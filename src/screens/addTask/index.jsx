@@ -4,12 +4,16 @@ import {Input, Button, RadioGroup, Radio} from '@ui-kitten/components';
 import CustomDatePicker from '../../components/ui/customDatePicker';
 import taskSchema from '../../utils/validation';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {status} from '../../utils/constant';
+import uuid from 'react-native-uuid';
 
 const AddTask = () => {
   const saveTask = async values => {
     try {
-      await AsyncStorage.setItem('task', JSON.stringify(values));
-      console.log('başarılı');
+      const savedTasks = await AsyncStorage.getItem('tasks');
+      let myTask = savedTasks ? JSON.parse(savedTasks) : [];
+      myTask.push(values);
+      await AsyncStorage.setItem('tasks', JSON.stringify(myTask));
     } catch (error) {
       console.log(error);
     }
@@ -19,11 +23,13 @@ const AddTask = () => {
     <View style={styles.container}>
       <Formik
         initialValues={{
+          id: uuid.v4(),
           title: 'Yazılım',
           description: 'Yazılım react native ders çalışılacak',
           startDate: null,
           endDate: null,
           category: null,
+          status: status.ONGOING,
         }}
         validationSchema={taskSchema}
         onSubmit={values => saveTask(values)}>
@@ -72,14 +78,14 @@ const AddTask = () => {
             <RadioGroup
               selectedIndex={values.category}
               onChange={index => setFieldValue('category', index)}>
-              <Radio status="success">Software</Radio>
-              <Radio status="success">Design</Radio>
-              <Radio status="success">Operation</Radio>
+              <Radio status="primary">Software</Radio>
+              <Radio status="primary">Design</Radio>
+              <Radio status="primary">Operation</Radio>
             </RadioGroup>
 
             <Button
-              status="success"
-              style={{marginTop: 30}}
+              status="primary"
+              style={styles.createButton}
               onPress={handleSubmit}>
               CREATE
             </Button>
@@ -96,5 +102,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 15,
+  },
+  createButton: {
+    marginTop: 30,
+    backgroundColor: '#0066FF',
+    borderWidth: 1,
+    borderColor: '#0066FF',
+    shadowColor: '#0066FF',
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 8,
+    textShadowOffset: {width: 1, height: 1},
+    textShadowRadius: 6,
+    textShadowColor: 'rgba(0, 102, 255, 0.6)',
   },
 });
